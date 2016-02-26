@@ -101,19 +101,22 @@ function connect_callback() {
                 localStorage.state = "网络连接成功（免费）";
                 text = "用户：" + info.USERNAME + "\n" +
                     "余额：" + info.BALANCE + "元\n" +
-                    "IP：" + info.IP;
+                    "IP：" + info.IP + "\n" +
+                    "当前连接数:" + info.CONNECTIONS;
                 icon = "background/succ.ico";
                 break;
             case "global":
                 localStorage.state = "网络连接成功（收费）";
                 text = "用户：" + info.USERNAME + "\n" +
                     "余额：" + info.BALANCE + "元\n" + 
-                    "IP：" + info.IP  + "\n" + "包月累计时长：" + info.TOTAL_TIME;
+                    "IP：" + info.IP  + "\n" + "包月累计时长：" + info.TOTAL_TIME + "\n" +
+                    "当前连接数:" + info.CONNECTIONS;
                 icon = "background/succ.ico";
                 break;
             case "disconnect":
                 localStorage.state = "断开全部连接成功";
-                text = "IP：" + info.IP;
+                text = "IP：" + info.IP + "\n" +
+                    "当前连接数:" + info.CONNECTIONS;
                 icon = "background/disc.ico";
                 break;
         }
