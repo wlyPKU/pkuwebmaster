@@ -25,6 +25,7 @@ window.onload = function() {
         bindonclick('free', "正在连接到免费...");
         bindonclick('global', "正在连接到收费...");
         bindonclick('disconnect', "正在断开...");
+		bindonclick('disconnectAll', "正在断开全部连接...");
         update_state();
     }
 };

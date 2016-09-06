@@ -10,6 +10,7 @@ var req, response_handle, cur_operation, closing_handle,
         REASON: "原因",
         STATE: "状态",
         USERNAME: "用户",
+		FR_DESC_CN: "包月类型",
         SCOPE: "访问范围",
         FIXRATE: "是否包月",
         DEFICIT: "余额不足",
@@ -34,9 +35,13 @@ function ipgwclient(operation) {
             range = 1;
             oper = "connect";
             break;
-        case "disconnect":
+        case "disconnectAll":
             range = 2;
             oper = "disconnectall";
+            break;
+		case "disconnect":
+            range = 2;
+            oper = "disconnect";
             break;
         default:
             return;
@@ -53,8 +58,16 @@ function ipgwclient(operation) {
 
 //get information dict from response string
 function get_info_from_response(response) {
-    var infos = response.split("<!--IPGWCLIENT_START ")[1].split(" IPGWCLIENT_END-->")[0].split(" "),
+	var infos = response.split("<!--IPGWCLIENT_START ")[1].split(" IPGWCLIENT_END-->")[0].split(" "),
         connect_info = [], tmp;
+
+    for (i = 0; i < infos.length; i++) {
+        tmp = infos[i].split("=");
+        if (tmp[0].trim() && tmp[1].trim())
+            connect_info[tmp[0]] = tmp[1];
+    }
+
+
 
     for (i = 0; i < infos.length; i++) {
         tmp = infos[i].split("=");
@@ -95,28 +108,41 @@ function connect_callback() {
     var info = get_info_from_response(req.responseText),
         icon = "icon.ico", text = "";
 
+	if(info.FR_DESC_CN == "90元不限时包月"){
+		info.TOTAL_TIME = "不限时"
+	}
     if (info.SUCCESS == "YES") {
         switch (cur_operation) {
             case "free":
-                localStorage.state = "网络连接成功（免费）";
-                text = "用户：" + info.USERNAME + "\n" +
-                    "余额：" + info.BALANCE + "元\n" +
-                    "IP：" + info.IP + "\n" +
-                    "当前连接数:" + info.CONNECTIONS;
-                icon = "background/succ.ico";
+				if(info.FR_DESC_CN == "90元不限时包月"){
+					localStorage.state = "网络连接成功（收费）";
+				}else{
+					localStorage.state = "网络连接成功（免费）";
+				}
+                text = 	"用户： " + info.USERNAME + "\n" +
+						"IP： " + info.IP +"\n" +
+						"余额：" + info.BALANCE + "元\n" +
+						"累计时长：" + info.TOTAL_TIME + "\n"+
+						"包月类型: " + info.FR_DESC_CN;
+                icon = "background/succ" + info.CONNECTIONS+".ico";
                 break;
             case "global":
                 localStorage.state = "网络连接成功（收费）";
-                text = "用户：" + info.USERNAME + "\n" +
-                    "余额：" + info.BALANCE + "元\n" + 
-                    "IP：" + info.IP  + "\n" + "包月累计时长：" + info.TOTAL_TIME + "\n" +
-                    "当前连接数:" + info.CONNECTIONS;
-                icon = "background/succ.ico";
+                text = 	"用户： " + info.USERNAME + "\n" +
+						"IP： " + info.IP +"\n" +
+						"余额：" + info.BALANCE + "元\n" +
+						"累计时长：" + info.TOTAL_TIME + "\n"+
+						"包月类型: " + info.FR_DESC_CN;
+                icon = "background/succ" + info.CONNECTIONS+".ico";
                 break;
             case "disconnect":
+                localStorage.state = "断开连接成功";
+                text = "IP：" + info.IP;
+                icon = "background/disc.ico";
+                break;
+			case "disconnectAll":
                 localStorage.state = "断开全部连接成功";
-                text = "IP：" + info.IP + "\n" +
-                    "当前连接数:" + info.CONNECTIONS;
+                text = "IP：" + info.IP;
                 icon = "background/disc.ico";
                 break;
         }
@@ -132,6 +158,10 @@ function connect_callback() {
                 icon = "background/busy.ico";
                 break;
             case "disconnect":
+                localStorage.state = "断开连接失败";
+                icon = "background/busy.ico";
+                break;
+			case "disconnectAll":
                 localStorage.state = "断开全部连接失败";
                 icon = "background/busy.ico";
                 break;
